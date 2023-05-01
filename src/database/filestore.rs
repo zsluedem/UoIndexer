@@ -2,12 +2,7 @@ use std::{fs, io::Write, path::PathBuf};
 
 use crate::uo::UserOperationData;
 
-pub trait DataBase {
-    type Error;
-    fn get_last_block(&self) -> u64;
-    fn write_user_operation(&self, uos: Vec<UserOperationData>) -> Result<(), Self::Error>;
-    fn write_last_block(&self, block_number: u64) -> Result<(), Self::Error>;
-}
+use super::DataBase;
 
 const LAST_BLOCK_FILE: &'static str = "last-block";
 

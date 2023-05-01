@@ -18,6 +18,7 @@ tokio = { version = "1", features = ["full"] }
 serde_json = "1.0"
 mongodb = { version = "2.5.0" }
 async-trait = "0.1.68"
+thiserror = "1"
 
 [[bin]]
 name = "bindexer"

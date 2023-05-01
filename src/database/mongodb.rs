@@ -2,11 +2,12 @@ use crate::{uo::UserOperationData, DataBase};
 use async_trait::async_trait;
 use mongodb::{
     bson::doc,
-    error::Error,
     options::{ClientOptions, UpdateOptions},
     Client,
 };
 use serde::{Deserialize, Serialize};
+
+use super::UoError;
 
 const UO_INDEXER_DB: &'static str = "UoIndexer";
 const LATEST_BLOCK_NUMBER: &'static str = "latestBlockNumber";
@@ -14,7 +15,7 @@ const DOC_KEY_INDEX: i32 = 0;
 const UO_COLLECTION: &'static str = "UserOperation";
 
 pub struct MongoDB {
-    cli_options: ClientOptions,
+    _cli_options: ClientOptions,
     client: Client,
 }
 
@@ -26,11 +27,11 @@ pub struct MetaData {
 }
 
 impl MongoDB {
-    pub async fn new(url: String) -> Result<Self, Error> {
+    pub async fn new(url: String) -> Result<Self, UoError> {
         let cli_options = ClientOptions::parse(url).await?;
         let client = Client::with_options(cli_options.clone())?;
         Ok(MongoDB {
-            cli_options,
+            _cli_options: cli_options,
             client,
         })
     }
@@ -38,8 +39,7 @@ impl MongoDB {
 
 #[async_trait]
 impl DataBase for MongoDB {
-    type Error = Error;
-    async fn get_last_block(&self) -> Result<u64, Self::Error> {
+    async fn get_last_block(&self) -> Result<u64, UoError> {
         let collection = self
             .client
             .clone()
@@ -56,7 +56,7 @@ impl DataBase for MongoDB {
         }
     }
 
-    async fn write_last_block(&self, block_number: u64) -> Result<(), Self::Error> {
+    async fn write_last_block(&self, block_number: u64) -> Result<(), UoError> {
         let collection = self
             .client
             .clone()
@@ -76,7 +76,7 @@ impl DataBase for MongoDB {
     async fn write_user_operation(
         &self,
         uos: Vec<crate::uo::UserOperationData>,
-    ) -> Result<(), Self::Error> {
+    ) -> Result<(), UoError> {
         let collection = self
             .client
             .clone()

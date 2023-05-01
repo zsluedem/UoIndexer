@@ -18,8 +18,9 @@ use tokio_retry::{strategy::FixedInterval, Retry};
 use tracing::{debug, info};
 
 use crate::{
+    config::Mode,
     constrant::{ENTRY_POINT_ADDR, SUPPORT_CHAIN},
-    database::{DataBase, FileDB},
+    database::{mongodb::MongoDB, DataBase, FileDB, Storage},
     uo::{HandleOpsCall, UserOperationData, UserOperationEvent},
 };
 
@@ -79,8 +80,13 @@ async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
     let config = Config::parse();
     debug!("Starting BIndexer with config {config:?}");
-    let path = PathBuf::from_str(&config.db_path)?;
-    let db = FileDB::new(path)?;
+
+    let db: Storage = match config.mode {
+        Mode::File => {
+            Storage::new(Box::new(FileDB::new(PathBuf::from_str(&config.db_path)?)?)).await
+        }
+        Mode::MongoDB => Storage::new(Box::new(MongoDB::new(config.mongodb_uri).await?)).await,
+    };
     let retry = FixedInterval::from_millis(RETRY_INTERVAL_MILLI);
 
     let last_block = db.get_last_block().await?;

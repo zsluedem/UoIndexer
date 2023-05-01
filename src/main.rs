@@ -80,10 +80,10 @@ async fn main() -> anyhow::Result<()> {
     let config = Config::parse();
     debug!("Starting BIndexer with config {config:?}");
     let path = PathBuf::from_str(&config.db_path)?;
-    let db = FileDB::new(path);
+    let db = FileDB::new(path)?;
     let retry = FixedInterval::from_millis(RETRY_INTERVAL_MILLI);
 
-    let last_block = db.get_last_block();
+    let last_block = db.get_last_block().await?;
     let provider = Arc::new(Provider::<Http>::try_from(config.rpc_url.clone())?);
     let mut latest_block = provider.clone().get_block_number().await?.as_u64();
     info!("Latest block in the network is {:?}", latest_block);
@@ -122,18 +122,18 @@ async fn main() -> anyhow::Result<()> {
                 let res =
                     fetch_uo_logs(current_block, latest_block, provider.clone(), chain_id).await?;
 
-                db.write_user_operation(res)?;
+                db.write_user_operation(res).await?;
                 current_block = latest_block;
-                db.write_last_block(current_block)?;
+                db.write_last_block(current_block).await?;
             } else {
                 info!("Indexer is going to continuously fetching logs from {current_block} to {latest_block}");
                 // When the current indexer is not up to date and fall behind more than MAX_STEP blocks
                 for target in (current_block + MAX_STEP..latest_block).step_by(MAX_STEP as usize) {
                     let res =
                         fetch_uo_logs(current_block, target, provider.clone(), chain_id).await?;
-                    db.write_user_operation(res)?;
+                    db.write_user_operation(res).await?;
                     current_block = target;
-                    db.write_last_block(current_block)?;
+                    db.write_last_block(current_block).await?;
                 }
             };
         }

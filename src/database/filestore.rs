@@ -1,6 +1,6 @@
-use std::{fs, io::Write, path::PathBuf};
-
 use crate::uo::UserOperationData;
+use async_trait::async_trait;
+use std::{fs, io::Write, path::PathBuf};
 
 use super::DataBase;
 
@@ -10,20 +10,21 @@ pub struct FileDB {
     folder: PathBuf,
 }
 
+#[async_trait]
 impl DataBase for FileDB {
     type Error = std::io::Error;
 
-    fn get_last_block(&self) -> u64 {
+    async fn get_last_block(&self) -> Result<u64, Self::Error> {
         let f = self.folder.join(LAST_BLOCK_FILE);
         if f.exists() {
-            let data = fs::read_to_string(f).expect("last block file should have block data");
-            data.parse::<u64>().expect("block file data corrupted")
+            let data = fs::read_to_string(f)?;
+            Ok(data.parse::<u64>().expect("block file data corrupted"))
         } else {
-            0
+            Ok(0)
         }
     }
 
-    fn write_last_block(&self, block_number: u64) -> Result<(), Self::Error> {
+    async fn write_last_block(&self, block_number: u64) -> Result<(), Self::Error> {
         let f = self.folder.join(LAST_BLOCK_FILE);
         let mut fd = fs::OpenOptions::new().write(true).create(true).open(f)?;
         fd.write_fmt(format_args!("{block_number}"))?;
@@ -31,7 +32,7 @@ impl DataBase for FileDB {
         Ok(())
     }
 
-    fn write_user_operation(&self, uos: Vec<UserOperationData>) -> Result<(), Self::Error> {
+    async fn write_user_operation(&self, uos: Vec<UserOperationData>) -> Result<(), Self::Error> {
         for uo in uos {
             let f = self.folder.join("data").join(uo.uo_hash.to_string());
             let mut fd = fs::OpenOptions::new().write(true).create(true).open(f)?;
@@ -43,9 +44,9 @@ impl DataBase for FileDB {
 }
 
 impl FileDB {
-    pub fn new(path: PathBuf) -> Self {
-        fs::create_dir_all(path.clone()).expect("Create folder failed.");
-        fs::create_dir_all(path.clone().join("data")).expect("Create folder failed.");
-        Self { folder: path }
+    pub fn new(path: PathBuf) -> Result<Self, std::io::Error> {
+        fs::create_dir_all(path.clone())?;
+        fs::create_dir_all(path.clone().join("data"))?;
+        Ok(Self { folder: path })
     }
 }

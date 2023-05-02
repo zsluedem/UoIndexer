@@ -1,4 +1,4 @@
-mod config;
+mod cli;
 mod constrant;
 mod database;
 mod uo;
@@ -6,7 +6,7 @@ mod uo;
 use std::{path::PathBuf, str::FromStr, sync::Arc, time::Duration};
 
 use clap::Parser;
-use config::Config;
+use cli::Cli;
 use ethers::{
     prelude::EthEvent,
     providers::{Http, Middleware, Provider},
@@ -18,7 +18,7 @@ use tokio_retry::{strategy::FixedInterval, Retry};
 use tracing::{debug, info};
 
 use crate::{
-    config::Mode,
+    cli::Mode,
     constrant::{ENTRY_POINT_ADDR, SUPPORT_CHAIN},
     database::{mongodb::MongoDB, DataBase, FileDB, Storage},
     uo::{HandleOpsCall, UserOperationData, UserOperationEvent},
@@ -78,14 +78,14 @@ async fn fetch_uo_logs(
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
-    let config = Config::parse();
+    let config = Cli::parse();
     debug!("Starting BIndexer with config {config:?}");
 
     let db: Storage = match config.mode {
-        Mode::File => {
-            Storage::new(Box::new(FileDB::new(PathBuf::from_str(&config.db_path)?)?)).await
+        Mode::File(args) => {
+            Storage::new(Box::new(FileDB::new(PathBuf::from_str(&args.db_path)?)?)).await
         }
-        Mode::MongoDB => Storage::new(Box::new(MongoDB::new(config.mongodb_uri).await?)).await,
+        Mode::MongoDB(args) => Storage::new(Box::new(MongoDB::new(args.uri).await?)).await,
     };
     let retry = FixedInterval::from_millis(RETRY_INTERVAL_MILLI);
 
@@ -112,7 +112,7 @@ async fn main() -> anyhow::Result<()> {
 
     let mut current_block = {
         if last_block == 0 {
-            info!("There is no history user operation in current database now. The indexer would start from scratch and it would take long to finish.");
+            info!("There is no history user operation in current database now. The indexer would start from scratch and it would take some time to finish.");
             chain_spec.contract_deployed_block_number
         } else {
             last_block

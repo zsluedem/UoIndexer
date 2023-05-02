@@ -66,7 +66,7 @@ impl DataBase for MongoDB {
         collection
             .update_one(
                 doc! {"key": DOC_KEY_INDEX},
-                doc! {"key": DOC_KEY_INDEX, "latest_block_number": number},
+                doc! {"$set":{ "latest_block_number": number}},
                 Some(UpdateOptions::builder().upsert(true).build()),
             )
             .await?;
@@ -77,12 +77,14 @@ impl DataBase for MongoDB {
         &self,
         uos: Vec<crate::uo::UserOperationData>,
     ) -> Result<(), UoError> {
-        let collection = self
-            .client
-            .clone()
-            .database(UO_INDEXER_DB)
-            .collection::<UserOperationData>(UO_COLLECTION);
-        collection.insert_many(uos, None).await?;
+        if !uos.is_empty() {
+            let collection = self
+                .client
+                .clone()
+                .database(UO_INDEXER_DB)
+                .collection::<UserOperationData>(UO_COLLECTION);
+            collection.insert_many(uos, None).await?;
+        }
         Ok(())
     }
 }

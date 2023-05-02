@@ -9,10 +9,10 @@ use serde::{Deserialize, Serialize};
 
 use super::UoError;
 
-const UO_INDEXER_DB: &'static str = "UoIndexer";
-const LATEST_BLOCK_NUMBER: &'static str = "latestBlockNumber";
+const UO_INDEXER_DB: &str = "UoIndexer";
+const LATEST_BLOCK_NUMBER: &str = "latestBlockNumber";
 const DOC_KEY_INDEX: i32 = 0;
-const UO_COLLECTION: &'static str = "UserOperation";
+const UO_COLLECTION: &str = "UserOperation";
 
 pub struct MongoDB {
     _cli_options: ClientOptions,

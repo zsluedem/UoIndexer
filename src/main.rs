@@ -62,7 +62,7 @@ async fn fetch_uo_logs(
         let uo_hash = result.hash();
         let data = UserOperationData {
             uo: result,
-            uo_hash: uo_hash,
+            uo_hash,
             transaction_hash,
             transaction_index: log.transaction_index.unwrap().as_u64(),
             block_number: log.block_number.unwrap().as_u64(),
@@ -126,7 +126,7 @@ async fn main() -> anyhow::Result<()> {
     let mut interval = time::interval(Duration::from_secs(INTERBAL)); // 13 is basically the interval between each block in eth
 
     loop {
-        if current_block + 1 <= latest_block {
+        if current_block < latest_block {
             if current_block + MAX_STEP > latest_block {
                 let res =
                     fetch_uo_logs(current_block, latest_block, provider.clone(), chain_id).await?;

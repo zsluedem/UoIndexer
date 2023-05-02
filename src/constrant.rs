@@ -1,6 +1,6 @@
 use lazy_static::lazy_static;
 
-pub const ENTRY_POINT_ADDR: &'static str = "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789";
+pub const ENTRY_POINT_ADDR: &str = "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789";
 
 #[derive(Debug, Clone)]
 pub struct ChainSpec {

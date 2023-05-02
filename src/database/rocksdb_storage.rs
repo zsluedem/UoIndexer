@@ -6,8 +6,8 @@ use crate::uo::UserOperationData;
 
 use super::{DataBase, UoError};
 
-const LAST_BLOCK_DB: &'static str = "lastBlock";
-const UO: &'static str = "UserOperation";
+const LAST_BLOCK_DB: &str = "lastBlock";
+const UO: &str = "UserOperation";
 
 pub struct RocksDb {
     _db_path: PathBuf,
@@ -68,14 +68,14 @@ impl RocksDb {
         options.create_missing_column_families(true);
         let cfs = DB::list_cf(&options, path.clone()).unwrap_or(vec![]);
 
-        if cfs.iter().find(|cf| cf.as_str() == LAST_BLOCK_DB).is_none() {
+        if !cfs.iter().any(|cf| cf.as_str() == LAST_BLOCK_DB) {
             let mut instance = rocksdb::DB::open_cf(&options, path.clone(), cfs.clone())?;
             let options = rocksdb::Options::default();
             instance.create_cf(LAST_BLOCK_DB, &options)?;
         }
 
-        if cfs.iter().find(|cf| cf.as_str() == UO).is_none() {
-            let mut instance = rocksdb::DB::open_cf(&options, path.clone(), cfs.clone())?;
+        if !cfs.iter().any(|cf| cf.as_str() == UO) {
+            let mut instance = rocksdb::DB::open_cf(&options, path.clone(), cfs)?;
 
             let options = rocksdb::Options::default();
             instance.create_cf(UO, &options)?;

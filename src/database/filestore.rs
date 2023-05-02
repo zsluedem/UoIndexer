@@ -4,7 +4,7 @@ use std::{fs, io::Write, path::PathBuf};
 
 use super::{DataBase, UoError};
 
-const LAST_BLOCK_FILE: &'static str = "last-block";
+const LAST_BLOCK_FILE: &str = "last-block";
 
 pub struct FileDB {
     folder: PathBuf,
@@ -48,7 +48,7 @@ impl DataBase for FileDB {
 impl FileDB {
     pub fn new(path: PathBuf) -> Result<Self, std::io::Error> {
         fs::create_dir_all(path.clone())?;
-        fs::create_dir_all(path.clone().join("data"))?;
+        fs::create_dir_all(path.join("data"))?;
         Ok(Self { folder: path })
     }
 }

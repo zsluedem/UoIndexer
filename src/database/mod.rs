@@ -1,14 +1,13 @@
-use std::fmt::{ Display};
+pub mod filestore;
+pub mod mongodb;
+pub mod rocksdb_storage;
 
 use crate::uo::UserOperationData;
-use async_trait::async_trait;
-
-pub mod filestore;
 use ::mongodb::error::Error;
+use async_trait::async_trait;
 pub use filestore::FileDB;
+use std::fmt::Display;
 use thiserror::Error;
-
-pub mod mongodb;
 
 #[derive(Error, Debug)]
 pub struct UoError(String);
@@ -28,6 +27,12 @@ impl From<std::io::Error> for UoError {
 impl From<Error> for UoError {
     fn from(value: Error) -> Self {
         UoError(value.to_string())
+    }
+}
+
+impl From<rocksdb::Error> for UoError {
+    fn from(value: rocksdb::Error) -> Self {
+        UoError(value.into_string())
     }
 }
 

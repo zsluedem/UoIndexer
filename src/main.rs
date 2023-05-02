@@ -20,7 +20,7 @@ use tracing::{debug, info};
 use crate::{
     cli::Mode,
     constrant::{ENTRY_POINT_ADDR, SUPPORT_CHAIN},
-    database::{mongodb::MongoDB, DataBase, FileDB, Storage},
+    database::{mongodb::MongoDB, rocksdb_storage::RocksDb, DataBase, FileDB, Storage},
     uo::{HandleOpsCall, UserOperationData, UserOperationEvent},
 };
 
@@ -86,6 +86,9 @@ async fn main() -> anyhow::Result<()> {
             Storage::new(Box::new(FileDB::new(PathBuf::from_str(&args.db_path)?)?)).await
         }
         Mode::MongoDB(args) => Storage::new(Box::new(MongoDB::new(args.uri).await?)).await,
+        Mode::RocksDB(args) => {
+            Storage::new(Box::new(RocksDb::new(PathBuf::from_str(&args.db_path)?)?)).await
+        }
     };
     let retry = FixedInterval::from_millis(RETRY_INTERVAL_MILLI);
 

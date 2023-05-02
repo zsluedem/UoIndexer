@@ -20,6 +20,8 @@ pub enum Mode {
     File(FileArgs),
     /// Run the indexer with MongoDB storage
     MongoDB(MongoArgs),
+    /// Run the indexer with LMDB storage
+    RocksDB(RocksArgs),
 }
 
 #[derive(Args, Debug)]
@@ -30,4 +32,9 @@ pub struct FileArgs {
 #[derive(Args, Debug)]
 pub struct MongoArgs {
     pub uri: String,
+}
+
+#[derive(Args, Debug)]
+pub struct RocksArgs {
+    pub db_path: String,
 }

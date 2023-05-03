@@ -26,7 +26,7 @@ More to come later.
 # Install
 
 ```
-cargo install 
+cargo install --git https://github.com/zsluedem/UoIndexer
 ```
 
 # How to use it

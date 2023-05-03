@@ -2,12 +2,12 @@
 
 OoIndexer is an [EIP-4337](https://eips.ethereum.org/EIPS/eip-4337) [UserOperation](https://github.com/eth-infinitism/account-abstraction/blob/develop/eip/EIPS/eip-4337.md#definitions) indexer.Currently, UoIndexer is still in **BETA**. Please use it at your own risk.
 
-Currently, UoIndexer support 2 kinds of database storage.
+UoIndexer currently supports two kinds of database storage:
 
 1. [RocksDB](https://rocksdb.org/)
 2. [MongoDB](https://www.mongodb.com/)
 
-# Support chain
+# Supported chain
 
 | ChainName     | chain id      |
 | ------------- | ------------- |
@@ -15,7 +15,7 @@ Currently, UoIndexer support 2 kinds of database storage.
 | Goerli  | 5  |
 
 
-More to come later.
+More chains will be supported later.
 
 # Prerequisites
 
@@ -31,16 +31,15 @@ cargo install --git https://github.com/zsluedem/UoIndexer
 
 # How to use it
 
-## Use RocksDB
+## Using RocksDB
 
 ```
 uoindexer --rpc-url https://eth-mainnet.g.alchemy.com/v2/api-key --chain-id 1 rocks-db ./.local/rocksdb
 ```
 
-## Use MongoDB
+## Using MongoDB
 
-Supposed you have a mongo instance at localhost:27017
-
+Assuming you have a MongoDB instance running at localhost:27017:
 ```
 uoindexer --rpc-url https://eth-mainnet.g.alchemy.com/v2/api-key --chain-id 1 mongo-db mongo-db mongodb://root:example@localhost:27017/
 ```
